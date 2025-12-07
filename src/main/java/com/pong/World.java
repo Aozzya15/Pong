@@ -33,7 +33,6 @@ public static void main(String[] args) {
             public void actionPerformed(ActionEvent e) {
                 game.gameLogic();
                 game.repaint();
-
             }
         });
 

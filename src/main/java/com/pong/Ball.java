@@ -31,7 +31,6 @@ public Ball(int x, int y, int changeX, int changeY, Color color, int size) {
  //precondition: None
  //postcondition: moves the ball by changeX and changeY
    public void moveBall() {
-	   
     x+= changeX;
     y+= changeY;
    }
@@ -64,6 +63,11 @@ public Ball(int x, int y, int changeX, int changeY, Color color, int size) {
 
 
    }
+ //precondition: None
+ //postcondition: returns the ball's size value
+  public int getSize() {
+	  return size;
+  }  
  //precondition: None
  //postcondition: returns the ball's y value
   public int getY() {

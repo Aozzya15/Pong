@@ -1,3 +1,10 @@
+//
+//  Class author:  Anthony Ciuccio
+//  Date created:  12/02
+//  General description: controls the drawing and game logic ofpong
+//
+
+
 package com.pong;
 
 import javax.swing.*;
@@ -10,14 +17,19 @@ public class PongGame extends JPanel implements MouseMotionListener {
     static int height = 480; // this is the amount of pixels to the top of the screen.
     private int userMouseY;
     private Paddle aiPaddle;
+    private Paddle playerPaddle;
     private int playerScore;
     private int aiScore;
     private Ball ball;
     // step 1 add any other private variables you may need to play the game.
+    private Wall wall;
+    private Speedup speedup;
+    private SlowDown slowdown;
 
     public PongGame() {
 
         aiPaddle = new Paddle(610, 240, 50, 9, Color.WHITE);
+        playerPaddle = new Paddle(0, 240, 50, 9, Color.WHITE);
         JLabel pScore = new JLabel("0");
         JLabel aiScore = new JLabel("0");
         pScore.setBounds(280, 440, 20, 20);
@@ -26,9 +38,12 @@ public class PongGame extends JPanel implements MouseMotionListener {
         aiScore.setVisible(true);
         userMouseY = 0;
         addMouseMotionListener(this);
-        ball = new Ball(200, 200, 10, 3, Color.RED, 10);
+        ball = new Ball(200, 200, 10, 3, Color.GREEN, 10);
 
         //create any other objects necessary to play the game.
+        wall = new Wall (315, 50, 50, 10, Color.BLUE);
+        speedup = new Speedup(295, 100, 50, 50);
+        slowdown = new SlowDown(295, 300, 50, 50);
 
     }
 
@@ -54,9 +69,12 @@ public class PongGame extends JPanel implements MouseMotionListener {
         g.setColor(Color.WHITE);
         g.drawString("The Score is User:" + playerScore + " vs Ai:" + aiScore, 240, 20);
         ball.draw(g);
-        aiPaddle.draw(g);
-        
         //call the "draw" function of any visual component you'd like to show up on the screen.
+        aiPaddle.draw(g);
+        playerPaddle.draw(g);
+        wall.draw(g);
+        speedup.draw(g);
+        slowdown.draw(g);
 
     }
 
@@ -66,11 +84,50 @@ public class PongGame extends JPanel implements MouseMotionListener {
     public void gameLogic() {
         //add commands here to make the game play propperly
         
-        aiPaddle.moveY(ball.getY());
+        aiPaddle.moveY(ball.getY(), ball.getChangeY());
+        playerPaddle.moveY(userMouseY, 0);
+
+        if (wall.isTouching(ball)) ball.reverseX();
+
+        if (speedup.isTouching(ball)) {
+            if (ball.getChangeX() * 1.05 < 15) {
+                ball.setChangeX(ball.getChangeX()*1.1);
+                ball.setChangeY(ball.getChangeY()*1.1);
+            }
+        }
+
+        if (slowdown.isTouching(ball)) {
+            if (ball.getChangeX() * .9 > 1) {
+                ball.setChangeX(ball.getChangeX()*.9);
+                ball.setChangeY(ball.getChangeY()*.9);
+            }
+        }
 
         if (aiPaddle.isTouching(ball)) {
            ball.reverseX();
+           ball.reverseY();
+            int centerYAI = aiPaddle.getY() + aiPaddle.getHeight() / 2;
+           
+           // makes ball change direction based off where on the paddle it hits like the original pong
+			ball.setChangeY(-((centerYAI+0.0-(ball.getY()+ball.getSize()/2))/30)*Math.abs(ball.getChangeX()));
+            ball.moveBall();
         }
+
+        if (playerPaddle.isTouching(ball)) {
+           ball.reverseX();
+            int centerYPlayer = playerPaddle.getY() + playerPaddle.getHeight() / 2;
+           
+           // makes ball change direction based off where on the paddle it hits like the original pong
+			ball.setChangeY(-((centerYPlayer+0.0-(ball.getY()+ball.getSize()/2))/30)*Math.abs(ball.getChangeX()));
+            ball.moveBall();
+        }
+
+        ball.bounceOffwalls(0, 460);
+        ball.moveBall();
+
+        // if (ball.getX() < 0 || ball.getX() > 640) {
+        //     ball.setX(320);
+        // }
  
         pointScored();
 
@@ -83,7 +140,14 @@ public class PongGame extends JPanel implements MouseMotionListener {
     // pixels) and the ai scores
     // if the ball goes off the left edge (0)
     public void pointScored() {
-
+        if (ball.getX() < 0) {
+            ball.setX(320);
+            aiScore+=1;
+        }
+        if (ball.getX() > 640) {
+            ball.setX(320);
+            playerScore+=1;
+        }
     }
 
     // you do not need to edit the below methods, but please do not remove them as

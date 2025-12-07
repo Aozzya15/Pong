@@ -30,28 +30,27 @@ public class Paddle {
 		
 	}
 	
-	//precondition: location is a non-null value
+	//precondition: location and yOffset is a non-null value
 	//postcondition: moves the paddle in the direction of the location 
-	public void moveY(int location) {
+	public void moveY(int location, double yOffset) {
+	 int yOffsetInt = ((int)yOffset); // adds a slight y offset so the AI bounces are more intresting
+	 location = location - yOffsetInt/2;
 	 int centerY = y + height / 2;		
-	 
+
 	 if (centerY<location) {
 		if ((centerY+speed)>location) {
-			y+= Math.abs(location-(centerY+speed));
+			y += speed - Math.abs(location-(centerY+speed));
 		}
 		else y+=speed;
 	 }
 	 
 	 else if (centerY>location) {
 	      if((centerY-speed)<location) {
-	    	  y-=(location-(centerY-speed));
+	    	  y -= speed - Math.abs(location-(centerY-speed));
 	      }
 		 
 	      else  y-=speed;	 
 	 }
-	 
-	 
-	 
 	
 	}
 	//precondition: none
@@ -65,18 +64,25 @@ public class Paddle {
 	  public int getX() {
 		  return x;
 	  }
-	  
+	
+	//precondition: none
+	//postcondition: returns the paddles x
+	  public int getHeight() {
+		  return height;
+	  }
+
 		//precondition: ball is a non-null value
 		//postcondition: returns true if the ball is touching one the paddle this is called on
 	 public boolean isTouching(Ball ball) {
 		 int rightX= x+width;
 		 int bottomY = y+height;
+		 int topy = y-ball.getSize(); // if you use the normal y then the ball can clip through the top
 		 
 		 if(x <= ball.getX() && ball.getX()<=rightX) {
-			 System.out.println("x in bounds");
-			 if(bottomY >= ball.getY() && ball.getY()>=y) {
+			//  System.out.println("x in bounds");
+			 if(bottomY >= ball.getY() && ball.getY()>=topy) {
 				 
-				 return true;
+				return true;
 			 }
 	 }
 		 return false;
